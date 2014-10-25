@@ -13,7 +13,7 @@ Repetitive and deep intro to the basics of programming JavaScript.
 - conditionals (`if`-`else`, `switch`)
 - l-to-r operators (`||`, `&&`) and assignment
 
-### [Book 2: A Game of Thrones redux, now with:](book2_gameOfThrones/starter/prompt.md)
+### [Book 2: A Game of Thrones redux, now with:](book2_gameOfThronesPart2/starter/prompt.md)
 
 - callbacks, anonymous functions
 - enumerations

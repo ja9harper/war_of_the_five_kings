@@ -2,14 +2,18 @@ include FileUtils
 
 desc "(alias: 'x') Creates correctly formatted " + \
      "student starter code for the contained exercises"
-task 'exercise', [:book, :type, :directory] do |cmd, args|
+task 'exercise', [:book, :type, :directory, :version] do |cmd, args|
 
   # handle options
   options = {
-    type:      'browserNoTests',
-    directory: '.'
+    type:      "browserNoTests",
+    directory: ".",
+    version:   "starter"
   }.merge args
-  options[:directory] = ENV["STUDENT_DIR"] || options[:directory]
+
+  # TODO (PJ): add this and version to readme
+  # TODO (PJ): good place to test WDI Gem
+  options[:directory] = ENV["STUDENT_DIR"] || "."
 
   unless options[:book]
     puts "Missing argument ':book', need to pass a number 1 thru 6."
@@ -35,7 +39,7 @@ task 'exercise', [:book, :type, :directory] do |cmd, args|
   source_exercise_name = Dir["{book#{options[:book]}}*"].first
   target_exercise_name = source_exercise_name.split('_')[1]
 
-  source_dir = File.join(base_dir, source_exercise_name, options[:type], "starter")
+  source_dir = File.join base_dir, source_exercise_name, options[:type], options[:version]
   target_dir = File.join(File.expand_path(options[:directory]), target_exercise_name)
   # puts source_dir + "/*"
   # puts target_dir
@@ -55,4 +59,4 @@ task 'exercise', [:book, :type, :directory] do |cmd, args|
   end
 end
 
-task 'x', [:book, :type, :directory] => 'exercise'
+task 'x', [:book, :type, :directory, :version] => 'exercise'
