@@ -1,4 +1,10 @@
 
+
+
+// TODO: NAMESPACE ALL DATA! and show an example of why... then RENAME vars below to be simpler!
+// modules? extra files?
+
+
 // Below you will see this function used... Ignore it or ask us about it! It's
 // how we will test your work to see if it is correct.
 function fName(f) {
@@ -87,31 +93,46 @@ var kings = [
   {
     name:  'Joffrey',
     house: 'Baratheon-Lannister',
-    lands: [30, 31, 25, 26, 27, 28, 29]
+    lands: [30, 31, 25, 26, 27, 28, 29],
+    warCry: ' demands allegiance, and orders his men to fight!',
+    allies: [],
+    enemies: ['Stannis', 'Renly', 'Robb']
   },
   {
     name:  'Stannis',
     house: 'Baratheon',
-    lands: [32, 33, 34]
+    lands: [32, 33, 34],
+    warCry: ' calls upon his god to bring fire to his enemies!',
+    allies: [],
+    enemies: ['Joffrey', 'Renly', 'Robb']
   },
   {
     name:  'Renly',
     house: 'Baratheon',
-    lands: [39, 40, 41, 42, 43, 44, 45, 35, 36, 37, 38]
+    lands: [39, 40, 41, 42, 43, 44, 45, 35, 36, 37, 38],
+    warCry: ' marches gloriously to battle!',
+    allies: ['Robb'],
+    enemies: ['Joffrey']
   },
   {
     name:  'Balon',
     house: 'Greyjoy',
-    lands: [24]
+    lands: [24],
+    warCry: ' sails to war with his reavers!',
+    allies: [],
+    enemies: ['Robb']
   },
   {
     name:  'Robb',
     house: 'Stark',
-    lands: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    lands: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    warCry: ', the Young Wolf, demands vengeance!',
+    allies: ['Renly'],
+    enemies: ['Joffrey']
   }
 ]
 
-var neutral = [0, 1, 2, 3, 20, 21, 22, 23, 46, 47, 48, 49, 50, 51, 52, 53];
+var neutral = [0, 1, 2, 20, 21, 22, 23, 46, 47, 48, 49, 50, 51, 52, 53];
 
 var adjacentRegions = {
   'The Wall'        : [
@@ -269,7 +290,7 @@ function landsInRegion(region) {
 // use Array.prototype.filter
 function landsInRegion(region) {
   var inRegion = lands.filter(function(land) {
-    return land['region'] == region;
+    return land.region == region;
   });
   return inRegion === [] ? null : inRegion;
 }
@@ -308,8 +329,8 @@ function allegianceOf(landName) {
 // **BONUS**: use Array.prototype.filter & .some (a tricky combo!)
 function allegianceOf(landName) {
   var foundKing = kings.filter(function(king) {
-    return king['lands'].some(function(landNumber) {
-      return (landName === lands[landNumber]['name']);
+    return king.lands.some(function(landNumber) {
+      return (landName === lands[landNumber].name);
     });
   });
   return foundKing.length > 0 ? foundKing[0] : {name: 'Neutral'};
@@ -342,7 +363,7 @@ function getKing(name) {
 // use Array.prototype.filter
 function getKing(name) {
   var king = kings.filter(function(kingObj){
-    return kingObj['name'] == name;
+    return kingObj.name == name;
   });
   return king.length > 0 ? king[0] : null;
 }
@@ -374,8 +395,8 @@ function powerOf(kingName) {
   var king = getKing(kingName);
   if (king === null) return null;
 
-  return king['lands'].reduce(function(aggregate, currentLandNumber) {
-    return aggregate += lands[currentLandNumber]['power'];
+  return king.lands.reduce(function(aggregate, currentLandNumber) {
+    return aggregate += lands[currentLandNumber].power;
   }, 0);
 }
 
@@ -388,11 +409,324 @@ exportToModule('chapter5', [
   powerOf
 ]);
 
+
+
+/* ******************** BELOW NOT FORMATTED YET *********************** */
+
+var regions = [];
+for (var region in adjacentRegions) {
+  regions.push(region);
+}
+
+function cardToOrd(num) {
+  var numStr = num.toString(),
+      len    = numStr.length,
+      last   = numStr[numStr.length - 1];
+  switch (parseInt(last)) {
+    case 1: return numStr + 'st';
+    case 2: return numStr + 'nd';
+    case 3: return numStr + 'rd';
+    default: return numStr + 'th';
+  }
+}
+
+function formatPowerOf(king) {
+  return ' (P: ' + king.power + ')';
+}
+
 /********************************
  * CHAPTER 6: A Storm of Swords *
  ********************************/
 
-// actually fight
+
+// can be: make ally, accept ally, make peace, (fight and) accept peace, fight, make enemy, or break ally
+const MAKE_ALLY    = {level: 6, description: 'make an alliance'};
+const ACCEPT_ALLY  = {level: 5, description: 'make peace, or even accept an alliance'};
+const MAKE_PEACE   = {level: 4, description: 'make peace'};
+const ACCEPT_PEACE = {level: 3, description: 'fight, but accept peace'};
+const FIGHT        = {level: 2, description: 'fight'};
+const MAKE_ENEMY   = {level: 1, description: 'make an enemy'};
+const BREAK_ALLY   = {level: 0, description: 'act villanously'};
+
+const DIP_STATS = [BREAK_ALLY, MAKE_ENEMY, FIGHT, ACCEPT_PEACE, MAKE_PEACE, ACCEPT_ALLY, MAKE_ALLY];
+
+/* ************* DEFINE THE BELOW ON THE KING OBJECTS ************** */
+kings.forEach(function(king) {
+  // king.diplomaticStatus = function() {}
+    // depends upon type being reasonable or unreasonable, resourceful or rigid (chaotic or lawful)
+    //
+    // reasonable tends toward higher score, unreasonable to lower
+    //   15% of the time, reasonable kings will fight and still accept peace
+    //   0% of the time, unreasonable kings will fight and still accept peace
+    // rigid shrinks the high and low scores (above and below fight):
+    //   45% of the time, resourceful kings fight
+    //   65% of the time, rigid kings fight
+    //
+    //   joffrey: unreasonable-rigid       5, 5, 5 (15) [  0/65 (65)] 10, 10 (20)
+    //   stannis: reasonable-rigid         3, 3, 4 (10) [ 15/65 (80)] 5, 5   (10)
+    //   renly:   reasonable-resourceful   6, 7, 7 (20) [ 15/45 (60)] 10, 10 (20)
+    //   balon:   unreasonable-resourceful 8, 8, 9 (25) [  0/45 (45)] 15, 15 (30)
+    //   robb:    reasonable-rigid         3, 3, 4 (10) [ 15/65 (80)] 5, 5   (10)
+  king.diplomaticStatus = function() {
+    var values = [];
+    switch (this.name) {
+      case 'Joffrey':
+        values = [10, 10, 65, 0, 5, 5, 5];
+        break;
+      case 'Stannis':
+      case 'Robb':
+        values = [5, 5, 65, 15, 4, 3, 3];
+        break;
+      case 'Renly':
+        values = [10, 10, 45, 15, 7, 7, 6];
+        break;
+      case 'Balon':
+        values = [15, 15, 45, 0, 9, 8, 8];
+        break;
+    }
+    var rand = Math.floor(Math.random() * 100) + 1;
+    var returnIndex;
+    values.reduce(function(aggregator, value, index) {
+      var lowerBound = aggregator
+      var upperBound = aggregator + value;
+      if (rand > lowerBound && rand <= upperBound) {
+        returnIndex = index;
+      }
+      return upperBound;
+    }, 0);
+    this.diplomaticStatus = DIP_STATS[returnIndex];
+    return this.diplomaticStatus;
+  }
+
+  // king.move = function() {}
+    // can be: request ally, request peace, raid, or attack
+    //
+    // if dipStat is make ally, then request ally
+    // else if allied with everyone, then bide time
+    //
+    // if dipStat is make peace, then attempt to make peace with an enemy
+    // else if no enemies can be attacked, then bide time
+    //
+    // if dipStat is break ally, then raid allied territory
+    // else if no allies, then attack neutral
+    // else if no neutral, then raid random
+    //
+    // if dipStat is make enemy, then attack someone who is not an ally or enemy
+    // else if no one is not an ally or enemy, then attack enemy
+    // else if no enemy can be attacked (ie everyone is ally), then attack ally
+    //
+    // else (dipStat is accept ally, accept peace, or fight)
+    //   if have an enemy, attack enemy
+    //   if no enemy can be attacked, then raid random non ally
+    //   if no non-ally, then bide time
+  king.move = function() {
+    var moveDescription;
+    if (this.diplomaticStatus.level === 6) { // MAKE AN ALLY!
+      if (this.allies.length === (kings.length - 1)) {
+        // you are allies with everyone!
+        moveDescription = '  ' + this.name + ' is in a good position and bides his time.';
+        return moveDescription;
+      }
+      var partner = this.requestAlly();
+      if (partner) {
+        this.makeAlly(partner);
+        // console.log(this);
+        // console.log(partner);
+        moveDescription = '  ' + this.name + ' offers an alliance to ' + partner.name + '... And ' + partner.name + ' accepts!';
+      } else {
+        moveDescription = '  ' + this.name + ' ponders an alliance, but finds no partners.';
+      }
+      return moveDescription;
+    } else if (this.diplomaticStatus.level === 5 || this.diplomaticStatus.level === 4) { // MAKE PEACE!
+      if (this.enemies.length === 0) {
+        // you have no enemies!
+        moveDescription = '  ' + this.name + ' is in a good position and bides his time.';
+        return moveDescription;
+      } else {
+        var partner = this.requestPeace();
+        console.log('makin peace!', this, partner);
+        if (partner) {
+          this.makePeace(partner);
+          moveDescription = '  ' + this.name + ' offers peace to ' + partner.name + '... And ' + partner.name + ' accepts!';
+        } else {
+          moveDescription = '  ' + this.name + ' ponders peace, but finds no partners.';
+        }
+        return moveDescription;
+      }
+    }
+  }
+
+  king.requestAlly = function() {
+    var ally = false;
+    var otherKings = kings;
+    otherKings.splice(kings.indexOf(this), 1);
+    // TODO: explain that we need to use FOR loop or pass context, bind
+    otherKings.forEach(function(otherKing) {
+      if (this.allies.indexOf(otherKing.name) === -1) {
+        // can't make allies unless you aren't allies
+        // console.log(otherKing.name, otherKing.diplomaticStatus.level, '4/5');
+        if (this.enemies.indexOf(otherKing.name) === -1 &&
+            otherKing.diplomaticStatus.level >= MAKE_PEACE.level) {
+          // there is another king that is not an enemy AND is willing to make
+          //   peace, ie a low threshold
+          ally = otherKing;
+        } else if (otherKing.diplomaticStatus.level >= ACCEPT_ALLY.level) {
+          // there is another king that is an enemy but still wants an ally!
+          ally = otherKing;
+        }
+      }
+    }.bind(this)); // if there are multiple, will take the last... oh well...
+    return ally;
+  }
+
+  king.makeAlly = function(otherKing) {
+    // remove from enemies if necessary
+    var thisIndex  = this.enemies.indexOf(otherKing.name);
+    var otherIndex = otherKing.enemies.indexOf(this.name);
+    if (thisIndex === -1) {
+      this.enemies.splice(thisIndex, 1);
+    }
+    if (otherIndex === -1) {
+      otherKing.enemies.splice(otherIndex, 1);
+    }
+
+    // add to allies
+    this.allies.push(otherKing.name)
+    otherKing.allies.push(this.name)
+  }
+
+  // enemies can be one way... allies must be two-way
+  king.makeEnemy = function(otherKing) {
+    // remove from allies if necessary
+    var thisIndex  = this.allies.indexOf(otherKing.name);
+    var otherIndex = otherKing.allies.indexOf(this.name);
+    if (thisIndex === -1) {
+      this.allies.splice(thisIndex, 1);
+    }
+    if (otherIndex === -1) {
+      otherKing.allies.splice(otherIndex, 1);
+    }
+
+    // add to enemies
+    this.enemies.push(otherKing.name);
+  }
+
+  // TODO: add a reminder to put in returns in our blocks (forEach, map, reduce, filter)
+  king.requestPeace = function() {
+    var partner = false;
+    var enemies = this.enemies.map(function(enemy) {return getKing(enemy)});
+
+    // TODO: explain that we need to use FOR loop or pass context, bind
+    enemies.forEach(function(otherKing) {
+      // console.log(otherKing.name, otherKing.diplomaticStatus.level, '4/5');
+      if (otherKing.diplomaticStatus.level >= MAKE_PEACE.level) {
+        // there is an enemy that is is willing to make peace
+        partner = otherKing;
+      }
+    }.bind(this)); // if there are multiple, will take the last... oh well...
+    return partner;
+  }
+
+  king.makePeace = function(otherKing) {
+    // remove from enemies if necessary
+    var thisIndex  = this.enemies.indexOf(otherKing.name);
+    var otherIndex = otherKing.enemies.indexOf(this.name);
+    if (thisIndex === -1) {
+      this.enemies.splice(thisIndex, 1);
+    }
+    if (otherIndex === -1) {
+      otherKing.enemies.splice(otherIndex, 1);
+    }
+  }
+
+  king.raid = function(territory) {}
+  king.attack = function(territory) {}
+});
+
+// actually fight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+// TODO: ensure there are no var declarations inside of loops!
+for (var i = 0; i < 1; i++) {
+  console.log('As the ' + cardToOrd(i+1) + ' campaign season begins:');
+
+  var currentKings = kings.map(function(king) {
+    var newKing   = king;
+    newKing.power = powerOf(king['name']);
+    return newKing;
+  });
+
+  console.log('\nThe contenders are:');
+
+  var trueKing = allegianceOf('King\'s Landing');
+  console.log('  King ' + trueKing['name'] + formatPowerOf(trueKing) + ' sits upon the Iron Throne.');
+
+  var contenders = currentKings.filter(function(king){ return king['name'] !== trueKing['name'];});
+  contenders     = contenders.sort(function(a, b){ return b.power - a.power; });
+
+  for (var j = 0, len = contenders.length; j < len; j++) {
+    var contender = contenders[j];
+    var title, message;
+
+    if (contender.power >= trueKing.power) {
+      title = 'King ';
+      message = ' vows to press his claim...'
+    } else {
+      title = 'The pretender ';
+      if (contender.power > (trueKing.power / 2)) {
+        message = ' demands to be recognized...'
+      } else if (contender.power > (trueKing.power / 4)) {
+        message = ' plots to take power...'
+      } else {
+        message = ' skulks in his halls...'
+      }
+    }
+    console.log('  ' + title + contender['name'] + ' of House ' + contender['house'] + formatPowerOf(contender) + message);
+  }
+
+  console.log('\nThe balance of power is:');
+
+  for (var j = 0, len = regions.length, region, lands; j < len; j++) {
+    region = regions[j];
+
+    var plural = (region[region.length-1] === 's') ? true : false;
+
+    regionsLands = landsInRegion(region);
+    regionsLands = regionsLands.map(function(land) {
+      return allegianceOf(land.name).name;
+    });
+    var powers = regionsLands.reduce( function(aggregator, value) {
+      if (aggregator.indexOf(value) == -1) {
+        aggregator.push(value);
+      }
+      return aggregator;
+    }, []);
+    if (powers.length == 1) {
+      if (powers[0] == 'Neutral') {
+        console.log('  ' + region + ' remain' + (plural ? '' : 's') + ' neutral.');
+      } else {
+        console.log('  ' + region + ' stand' + (plural ? '' : 's') + ' behind ' + powers[0] + '.');
+      }
+    } else {
+      if (powers.indexOf('Neutral') !== -1) {
+        powers.splice(powers.indexOf('Neutral'), 1);
+        console.log('  ' + region + (plural ? ' are ' : ' is ') + 'contested by ' + powers.join(', ') + '; but desires neutrality.');
+      } else {
+        console.log('  ' + region + (plural ? ' are ' : ' is ') + 'contested by ' + powers.join(', ') + '.');
+      }
+    }
+  }
+
+  console.log('\nThe game begins:');
+
+  currentKings.sort(function(a, b){ return a.power - b.power; }).forEach(function(king) {
+    console.log('  ' + king.name + ' has decided to ' + king.diplomaticStatus().description + '...');
+  });
+
+  currentKings.sort(function(a, b){ return a.power - b.power; }).forEach(function(king) {
+    console.log('\n' + king.name + ' makes his move, and:');
+    console.log(king.move());
+  });
+}
 
 /********************************
  * CHAPTER 7: The Dragon Awakes *
