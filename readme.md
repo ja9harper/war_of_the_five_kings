@@ -95,16 +95,16 @@ While you copy the starter to the students' directory as such (for a class doing
 
 ## Using `rake x`
 
-There is a Rakefile in the base of this exercise banklet with a single task in it: `rake exercise`, aliased to `rake x`. Pass it the book and type of exercise, and it will create a folder in the base that can be copied directly to the student repo (correctly named starter code). Pass it an optional third argument of the directory you want to add it to, and it will build it there!
+There is a Rakefile in the base of this exercise *banklet* with a single task in it: `rake exercise`, aliased to `rake x`. Pass it the book and type of exercise, and it will create a folder (correctly named with starter code) in the base that can be copied directly to the student repo. Pass it an optional third argument of the directory you want to add it to, and it will build it there!
 
 Example:
 
 ```bash
 rake x[1] # defaults to browserNoTests
-# => 'Exercise directory ./gameOfThrones created! Move it to the student repo as is.'
+# => 'Exercise directory './gameOfThrones' created! Move it to the student repo as is.'
 
 rake x[2,nodeTested,~/dev/wdi/godot/w6/d03/Classwork]
-# => 'Exercise directory ~/dev/wdi/godot/w6/d03/Classwork/gameOfThrones created!'
+# => 'Exercise directory '~/dev/wdi/godot/w6/d03/Classwork/gameOfThrones' created!'
 ```
 
 ## The Style
