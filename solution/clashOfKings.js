@@ -372,6 +372,19 @@ var lands = [
   // the far north: 73
 ];
 
+var regions = {
+  'The Wall',
+  'The North',        // 1
+  'The Riverlands',
+  'The Vale',         // 2
+  'The Iron Islands', // 3
+  'The Westerlands',  // 4
+  'The Crownlands',
+  'The Stormlands',   // 5
+  'The Reach',        // 6
+  'Dorne'             // 7 (kingdoms)
+};
+
 var kings = [
   {
     name:        'Joffrey',
