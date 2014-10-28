@@ -25,7 +25,7 @@ function exportToModule(moduleName, properties) {
 }
 
 // For really modeling this war, we're going to need some better data:
-//   - lands: a list of the lands of Westeros,
+//   - landIndices: a list of the lands of Westeros,
 //   - adjacentRegions: a "hash" (Object) of the regions of Westeros, and the
 //       regions adjacent (next to) each,
 //   - kings: a list of the claimants to kingship, and the lands that recognize
@@ -33,187 +33,404 @@ function exportToModule(moduleName, properties) {
 //   - neutral: the list of lands not claiming any king.
 
 var lands = [
-  {region: 'The Wall',        name: 'The Wall',            type: 'stronghold', power: 0,  defense: 20},
-  {region: 'The Wall',        name: 'Castle Black',        type: 'stronghold', power: 4,  defense: 8},
-  {region: 'The Wall',        name: 'Brandon\'s Gift',     type: 'territory',  power: 1,  defense: 1},
-  {region: 'The Wall',        name: 'The New Gift',        type: 'territory',  power: 2,  defense: 1},
-  {region: 'The North',       name: 'Bay of Seals',        type: 'territory',  power: 1,  defense: 1},
-  {region: 'The North',       name: 'Bear Island',         type: 'territory',  power: 2,  defense: 4},
-  {region: 'The North',       name: 'The Wolfswood',       type: 'territory',  power: 1,  defense: 1},
-  {region: 'The North',       name: 'The Lonely Hills',    type: 'territory',  power: 1,  defense: 2},
-  {region: 'The North',       name: 'The Hornwood',        type: 'territory',  power: 1,  defense: 1},
-  {region: 'The North',       name: 'The Barrowlands',     type: 'territory',  power: 1,  defense: 1},
-  {region: 'The North',       name: 'Stony Shore',         type: 'territory',  power: 1,  defense: 1},
-  {region: 'The North',       name: 'Flint Cliffs',        type: 'territory',  power: 1,  defense: 1},
-  {region: 'The North',       name: 'The Neck',            type: 'stronghold', power: 1,  defense: 10},
-  {region: 'The North',       name: 'The Three Sisters',   type: 'territory',  power: 2,  defense: 2},
-  {region: 'The North',       name: 'White Harbor',        type: 'city',       power: 3,  defense: 2},
-  {region: 'The Riverlands',  name: 'The Cape of Eagles',  type: 'territory',  power: 1,  defense: 1},
-  {region: 'The Riverlands',  name: 'The Green Fork',      type: 'territory',  power: 2,  defense: 2},
-  {region: 'The Riverlands',  name: 'The Trident',         type: 'territory',  power: 2,  defense: 2},
-  {region: 'The Riverlands',  name: 'God\'s Eye',          type: 'stronghold', power: 1,  defense: 2},
-  {region: 'The Riverlands',  name: 'Riverrun',            type: 'stronghold', power: 1,  defense: 6},
-  {region: 'The Vale',        name: 'Gulltown',            type: 'city',       power: 3,  defense: 2},
-  {region: 'The Vale',        name: 'The Mountains of the Moon', type: 'territory', power: 1, defense: 5},
-  {region: 'The Vale',        name: 'The Fingers',         type: 'territory',  power: 2,  defense: 2},
-  {region: 'The Vale',        name: 'The Vale of Arryn',   type: 'stronghold', power: 3,  defense: 14},
-  {region: 'The Iron Islands', name: 'The Iron Islands',   type: 'stronghold', power: 10, defense: 10},
-  {region: 'The Westerlands', name: 'The Golden Tooth',    type: 'stronghold', power: 1,  defense: 6},
-  {region: 'The Westerlands', name: 'Sunset Sea',          type: 'territory',  power: 4,  defense: 1},
-  {region: 'The Westerlands', name: 'The Crag',            type: 'stronghold', power: 2,  defense: 4},
-  {region: 'The Westerlands', name: 'Crakehall Wood',      type: 'territory',  power: 2,  defense: 1},
-  {region: 'The Westerlands', name: 'Lannisport',          type: 'city',       power: 6,  defense: 2},
-  {region: 'The Crownlands',  name: 'The Kingswood',       type: 'territory',  power: 2,  defense: 1},
-  {region: 'The Crownlands',  name: 'King\'s Landing',     type: 'city',       power: 12, defense: 10},
-  {region: 'The Crownlands',  name: 'Crackclaw Point',     type: 'territory',  power: 1,  defense: 1},
-  {region: 'The Crownlands',  name: 'Dragonstone',         type: 'stronghold', power: 3,  defense: 7},
-  {region: 'The Stormlands',  name: 'The Rainwood',        type: 'territory',  power: 2,  defense: 1},
-  {region: 'The Stormlands',  name: 'Summerhall',          type: 'territory',  power: 2,  defense: 2},
-  {region: 'The Stormlands',  name: 'Tarth',               type: 'territory',  power: 2,  defense: 2},
-  {region: 'The Stormlands',  name: 'Shipbreaker Bay',     type: 'territory',  power: 1,  defense: 2},
-  {region: 'The Stormlands',  name: 'The Dornish Marches', type: 'territory',  power: 1,  defense: 3},
-  {region: 'The Reach',       name: 'The Shield Islands',  type: 'territory',  power: 2,  defense: 4},
-  {region: 'The Reach',       name: 'The Arbor',           type: 'territory',  power: 3,  defense: 2},
-  {region: 'The Reach',       name: 'Redwyne Straits',     type: 'territory',  power: 1,  defense: 1},
-  {region: 'The Reach',       name: 'Starfall',            type: 'stronghold', power: 2,  defense: 5},
-  {region: 'The Reach',       name: 'The Mander',          type: 'territory',  power: 8,  defense: 1},
-  {region: 'The Reach',       name: 'Grassy Vale',         type: 'territory',  power: 4,  defense: 1},
-  {region: 'The Reach',       name: 'Oldtown',             type: 'city',       power: 10, defense: 2},
-  {region: 'Dorne',           name: 'Sunspear',            type: 'territory',  power: 3,  defense: 3},
-  {region: 'Dorne',           name: 'The Stepstones',      type: 'territory',  power: 1,  defense: 3},
-  {region: 'Dorne',           name: 'Prince\'s Pass',      type: 'stronghold', power: 1,  defense: 5},
-  {region: 'Dorne',           name: 'The Boneway',         type: 'stronghold', power: 1,  defense: 5},
-  {region: 'Dorne',           name: 'Yronwood',            type: 'territory',  power: 2,  defense: 1},
-  {region: 'Dorne',           name: 'The Greenblood',      type: 'territory',  power: 2,  defense: 1},
-  {region: 'Dorne',           name: 'Red Mountains',       type: 'territory',  power: 1,  defense: 3},
-  {region: 'Dorne',           name: 'The Sands',           type: 'territory',  power: 1,  defense: 1}
+  /* ******************************** THE  WALL ***************************** */
+  { /* 00 */
+    name: 'The Wall',        type: 'stronghold', region: 'The Wall',
+    power: 0, defense: 20,
+    adjacent: [1, 2] // and the lands beyond the wall (73)
+  },
+  { /* 01 */
+    name: 'Castle Black',    type: 'stronghold', region: 'The Wall',
+    power: 4, defense: 8,
+    adjacent: [0, 2] // and the lands beyond the wall (73)
+  },
+  { /* 02 */
+    name: 'Brandon\'s Gift', type: 'territory',  region: 'The Wall',
+    power: 1, defense: 1,
+    adjacent: [0, 1, 3, 4, 5]
+  },
+  { /* 03 */
+    name: 'The New Gift',    type: 'territory',  region: 'The Wall',
+    power: 1, defense: 1,
+    adjacent: [2, 4, 5, 7, 8]
+  },
+  /* ******************************** THE NORTH ***************************** */
+  { /* 04 */
+    name: 'Bear Island',      type: 'territory',  region: 'The North',
+    power: 2, defense: 4,      sea: true,
+    adjacent: [2, 3, 7, 9, 26] // and the lands beyond the wall (73)
+  },
+  { /* 05 */
+    name: 'Bay of Seals',     type: 'territory',  region: 'The North',
+    power: 1, defense: 1,      sea: true,
+    adjacent: [2, 3, 6, 8, 10, 22] // and the lands beyond the wall (73)
+  },
+  { /* 06 */
+    name: 'The Three Sisters', type: 'territory', region: 'The North',
+    power: 2, defense: 2,       sea: true,
+    adjacent: [5, 10, 15, 16, 18, 22, 23]
+  },
+  { /* 07 */
+    name: 'The Wolfswood',    type: 'territory',  region: 'The North',
+    power: 1, defense: 1,
+    adjacent: [3, 4, 8, 9, 11, 14]
+  },
+  { /* 08 */
+    name: 'The Grey Cliffs',  type: 'territory',  region: 'The North',
+    power: 1, defense: 2,
+    adjacent: [3, 5, 7, 10, 14]
+  },
+  { /* 09 */
+    name: 'Sea Dragon Point', type: 'territory',  region: 'The North',
+    power: 1, defense: 1,
+    adjacent: [4, 7, 11, 12, 27]
+  },
+  { /* 10 */
+    name: 'Sheepshead Hills', type: 'territory',  region: 'The North',
+    power: 1, defense: 1,
+    adjacent: [5, 6, 8, 14, 15, 16, 22]
+  },
+  { /* 11 */
+    name: 'The Barrowlands',  type: 'territory',  region: 'The North',
+    power: 1, defense: 1,
+    adjacent: [7, 9, 12, 13, 14, 15, 27]
+  },
+  { /* 12 */
+    name: 'Stony Shore',      type: 'territory',  region: 'The North',
+    power: 1, defense: 1,
+    adjacent: [9, 11, 13, 27]
+  },
+  { /* 13 */
+    name: 'Flint\'s Finger',  type: 'territory',  region: 'The North',
+    power: 1, defense: 1,
+    adjacent: [11, 12, 15, 17, 27]
+  },
+  { /* 14 */
+    name: 'Winterfell',       type: 'stronghold', region: 'The North',
+    power: 3, defense: 5,
+    adjacent: [7, 8, 10, 11, 15]
+  },
+  { /* 15 */
+    name: 'The Neck',         type: 'stronghold', region: 'The North',
+    power: 1, defense: 10,
+    adjacent: [6, 10, 11, 13, 14, 16, 17, 18]
+  },
+  { /* 16 */
+    name: 'White Harbor',      type: 'city',      region: 'The North',
+    power: 3, defense: 2,
+    adjacent: [6, 10, 15]
+  },
+  /* ***************************** THE RIVERLANDS *************************** */
+  { /* 17 */
+    name: 'The Cape of Eagles', type: 'territory',  region: 'The Riverlands',
+    power: 1, defense: 1,
+    adjacent: [13, 15, 18, 27]
+  },
+  { /* 18 */
+    name: 'The Green Fork',     type: 'territory',  region: 'The Riverlands',
+    power: 2, defense: 2,
+    adjacent: [6, 15, 17, 19, 20, 21, 23, 27]
+  },
+  { /* 19 */
+    name: 'The Trident',        type: 'territory',  region: 'The Riverlands',
+    power: 2, defense: 2,
+    adjacent: [18, 20, 23, 24, 35]
+  },
+  { /* 20 */ // should be called Harrenhall?
+    name: 'God\'s Eye',         type: 'stronghold', region: 'The Riverlands',
+    power: 1, defense: 2,
+    adjacent: [18, 19, 21, 35, 46, 47, 48]
+  },
+  { /* 21 */
+    name: 'Riverrun',           type: 'stronghold', region: 'The Riverlands',
+    power: 1, defense: 6,
+    adjacent: [18, 20, 31, 32, 46]
+  },
+  /* ******************************** THE VALE ****************************** */
+  { /* 22 */
+    name: 'The Fingers',         type: 'territory',   region: 'The Vale',
+    power: 2, defense: 2,         sea: true,
+    adjacent: [5, 6, 10, 23, 24, 25, 26, 34, 36, 39]
+  },
+  { /* 23 */
+    name: 'Mountains of the Moon', type: 'territory', region: 'The Vale',
+    power: 1, defense: 5,
+    adjacent: [6, 18, 19, 22, 24, 25]
+  },
+  { /* 24 */
+    name: 'The Bay of Crabs',     type: 'territory',  region: 'The Vale',
+    power: 2, defense: 1, //sea: true? this may make sense!!!!
+    adjacent: [19, 22, 23, 26, 35, 36]
+  },
+  { /* 25 */
+    name: 'The Vale of Arryn',   type: 'stronghold',  region: 'The Vale',
+    power: 3, defense: 14,
+    adjacent: [22, 23, 26]
+  },
+  { /* 26 */
+    name: 'Gulltown',            type: 'city',        region: 'The Vale',
+    power: 3, defense: 2,
+    adjacent: [22, 24, 25]
+  },
+  /* **************************** THE IRON ISLANDS ************************** */
+  { /* 27 */
+    name: 'The Iron Islands', type: 'stronghold', region: 'The Iron Islands',
+    power: 10, defense: 10,
+    adjacent: [4, 9, 11, 12, 13, 17, 18, 28, 29, 32], sea: true
+  },
+  /* ***************************** THE WESTERLANDS ************************** */
+  { /* 28 */
+    name: 'Fairisle',         type: 'territory',  region: 'The Westerlands',
+    power: 2, defense: 1, sea: true,
+    adjacent: [27, 29, 30, 33, 44]
+  },
+  { /* 29 */
+    name: 'Kayce',            type: 'territory',  region: 'The Westerlands',
+    power: 3, defense: 1,
+    adjacent: [27, 28, 30, 31, 32, 33]
+  },
+  { /* 30 */
+    name: 'Crakehall Wood',   type: 'territory',  region: 'The Westerlands',
+    power: 2, defense: 1,
+    adjacent: [28, 29, 31, 33, 44, 46]
+  },
+  { /* 31 */
+    name: 'The Golden Tooth', type: 'stronghold', region: 'The Westerlands',
+    power: 1, defense: 6,
+    adjacent: [21, 29, 30, 31, 32, 33, 46]
+  },
+  { /* 32 */
+    name: 'The Crag',         type: 'stronghold', region: 'The Westerlands',
+    power: 2, defense: 4,
+    adjacent: [18, 21, 27, 29, 31]
+  },
+  { /* 33 */
+    name: 'Lannisport',       type: 'city',       region: 'The Westerlands',
+    power: 6, defense: 2,
+    adjacent: [28, 29, 31, 30]
+  },
+  /* ***************************** THE CROWNLANDS *************************** */
+  { /* 34 */
+    name: 'Dragonstone',     type: 'stronghold', region: 'The Crownlands',
+    power: 3, defense: 7, sea: true,
+    adjacent: [22, 35, 36, 37, 38, 39]
+  },
+  { /* 35 */
+    name: 'Duskendale',      type: 'territory', region: 'The Crownlands',
+    power: 2, defense: 1,
+    adjacent: [19, 20, 24, 34, 36, 38, 47]
+  },
+  { /* 36 */
+    name: 'Crackclaw Point', type: 'territory', region: 'The Crownlands',
+    power: 1, defense: 1,
+    adjacent: [22, 24, 34, 35]
+  },
+  { /* 37 */
+    name: 'The Kingswood',   type: 'territory', region: 'The Crownlands',
+    power: 1, defense: 3,
+    adjacent: [34, 35, 38, 39, 41, 43, 47, 48]
+  },
+  { /* 38 */
+    name: 'King\'s Landing', type: 'city',      region: 'The Crownlands',
+    power: 12, defense: 10,
+    adjacent: [34, 35, 37]
+  },
+  /* ***************************** THE STORMLANDS *************************** */
+  { /* 39 */
+    name: 'Tarth',               type: 'territory',  region: 'The Stormlands',
+    power: 2, defense: 2, sea: true,
+    adjacent: [22, 34, 37, 43, 41, 40, 54, 55]
+  },
+  { /* 40 */
+    name: 'Cape Wrath',          type: 'territory',  region: 'The Stormlands',
+    power: 2, defense: 1,
+    adjacent: [39, 41, 42, 55]
+  },
+  { /* 41 */
+    name: 'Summerhall',          type: 'territory',  region: 'The Stormlands',
+    power: 2, defense: 2,
+    adjacent: [37, 43, 39, 40, 42, 48]
+  },
+  { /* 42 */
+    name: 'The Dornish Marches', type: 'territory',  region: 'The Stormlands',
+    power: 1, defense: 3,
+    adjacent: [41, 40, 52, 55, 61, 60, 48, 49]
+  },
+  { /* 43 */
+    name: 'Storm\'s End',        type: 'stronghold', region: 'The Stormlands',
+    power: 3, defense: 6,
+    adjacent: [37, 39, 41]
+  },
+  /* ******************************** THE REACH ***************************** */
+  { /* 44 */
+    name: 'The Shield Islands', type: 'territory',  region: 'The Reach',
+    power: 2, defense: 3, sea: true,
+    adjacent: [28, 30, 45, 46, 51, 49, 50]
+  },
+  { /* 45 */
+    name: 'The Arbor',          type: 'territory',  region: 'The Reach',
+    power: 2, defense: 2, sea: true,
+    adjacent: [44, 49, 50, 52, 53, 58, 59, 63]
+  },
+  { /* 46 */
+    name: 'Goldengrove',        type: 'territory',  region: 'The Reach',
+    power: 4, defense: 1,
+    adjacent: [20, 21, 30, 31, 44, 47, 51]
+  },
+  { /* 47 */
+    name: 'The Mander',         type: 'territory',  region: 'The Reach',
+    power: 5, defense: 1,
+    adjacent: [20, 35, 37, 38, 46, 48, 51]
+  },
+  { /* 48 */
+    name: 'Grassy Vale',        type: 'territory',  region: 'The Reach',
+    power: 3, defense: 1,
+    adjacent: [37, 41, 42, 47, 49, 51]
+  },
+  { /* 49 */
+    name: 'Redwyne Straits',    type: 'territory',  region: 'The Reach',
+    power: 2, defense: 1,
+    adjacent: [44, 45, 49, 53]
+  },
+  { /* 50 */
+    name: 'Horn Hill',          type: 'territory',  region: 'The Reach',
+    power: 1, defense: 3,
+    adjacent: [42, 44, 45, 48, 50, 51, 52]
+  },
+  { /* 51 */
+    name: 'Highgarden',         type: 'stronghold', region: 'The Reach',
+    power: 3, defense: 3,
+    adjacent: [44, 46, 47, 48, 49]
+  },
+  { /* 52 */
+    name: 'Starfall',           type: 'stronghold', region: 'The Reach',
+    power: 2, defense: 5,
+    adjacent: [42, 45, 49, 58, 60]
+  },
+  { /* 53 */
+    name: 'Oldtown',            type: 'city',       region: 'The Reach',
+    power: 9, defense: 2,
+    adjacent: [45, 50]
+  },
+  /* ********************************** DORNE ******************************* */
+  { /* 54 */
+    name: 'The Stepstones', type: 'territory',  region: 'Dorne',
+    power: 1, defense: 3,    sea: true,
+    adjacent: [39, 55, 57, 63]
+  },
+  { /* 55 */
+    name: 'Sea of Dorne',   type: 'territory',  region: 'Dorne',
+    power: 0, defense: 0,    sea: true,
+    adjacent: [39, 40, 42, 54, 56, 57, 61]
+  },
+  { /* 56 */
+    name: 'Yronwood',       type: 'territory',  region: 'Dorne',
+    power: 2, defense: 1,
+    adjacent: [55, 57, 59, 61]
+  },
+  { /* 57 */
+    name: 'Broken Arm',     type: 'territory',  region: 'Dorne',
+    power: 3, defense: 1,
+    adjacent: [54, 55, 56, 59, 62, 63]
+  },
+  { /* 58 */
+    name: 'Red Mountains',  type: 'territory',  region: 'Dorne',
+    power: 1, defense: 3,
+    adjacent: [45, 52, 59, 60]
+  },
+  { /* 59 */
+    name: 'The Sands',      type: 'territory',  region: 'Dorne',
+    power: 1, defense: 1,
+    adjacent: [45, 56, 57, 58, 60, 61, 63]
+  },
+  { /* 60 */
+    name: 'Prince\'s Pass', type: 'stronghold', region: 'Dorne',
+    power: 1, defense: 5,
+    adjacent: [42, 52, 58, 59, 61]
+  },
+  { /* 61 */
+    name: 'The Boneway',    type: 'stronghold', region: 'Dorne',
+    power: 1, defense: 5,
+    adjacent: [42, 55, 56, 59, 60]
+  },
+  { /* 62 */
+    name: 'Sunspear',       type: 'stronghold', region: 'Dorne',
+    power: 3, defense: 3,
+    adjacent: [57, 63]
+  },
+  /* ******************************* OTHER LANDS **************************** */
+  { /* 63 */
+    name: 'The Summer Sea', type: 'ocean',  region: 'Dorne',
+    power: 0, defense: 0,   sea: true,
+    adjacent: []
+  }
+  // the sunset sea: 64
+  // the shivering sea: 65
+  // the narrow sea: 66
+  // braavos: 67, pentos: 68, myr: 69, tyrosh: 70, lys: 71
+  // skagos: 72
+  // the far north: 73
 ];
 
 var kings = [
   {
-    name:  'Joffrey',
-    house: 'Baratheon-Lannister',
-    lands: [30, 31, 25, 26, 27, 28, 29],
-    warCry: ' demands allegiance, and orders his men to fight!',
-    allies: [],
-    enemies: ['Stannis', 'Renly', 'Robb']
+    name:        'Joffrey',
+    house:       'Baratheon-Lannister',
+    // influence is an indicator of personal charisma and power, ie the loyalty
+    //   and dedication a king inspires in those who serve him -- the king brings
+    //   their influence as power to every fight!
+    influence:   4, // the king is cruel and cowardly, but his family is strong
+                    // also: sitting the Iron Throne adds + 4 to influence
+    landIndices: [30, 31, 25, 26, 27, 28, 29],
+    warCry:      ' demands allegiance, and orders his men to fight!',
+    allies:      [],
+    enemies:     ['Stannis', 'Renly', 'Robb'],
+    other:       ['Balon']
   },
   {
-    name:  'Stannis',
-    house: 'Baratheon',
-    lands: [32, 33, 34],
-    warCry: ' calls upon his god to bring fire to his enemies!',
-    allies: [],
-    enemies: ['Joffrey', 'Renly', 'Robb']
+    name:        'Stannis',
+    house:       'Baratheon',
+    influence:   4, // the red woman inspires terror, but Stannis does not inspire love...
+    landIndices: [32, 33, 34],
+    warCry:      ' calls upon his god to bring fire to his enemies!',
+    allies:      [],
+    enemies:     ['Joffrey', 'Renly', 'Robb'],
+    other:       ['Balon']
   },
   {
-    name:  'Renly',
-    house: 'Baratheon',
-    lands: [39, 40, 41, 42, 43, 44, 45, 35, 36, 37, 38],
-    warCry: ' marches gloriously to battle!',
-    allies: ['Robb'],
-    enemies: ['Joffrey']
+    name:        'Renly',
+    house:       'Baratheon',
+    influence:   6, // the people love him, and his guard is devoted! but there are rumors...
+    landIndices: [39, 40, 41, 42, 43, 44, 45, 35, 36, 37, 38],
+    warCry:      ' marches gloriously to battle!',
+    allies:      ['Robb'],
+    enemies:     ['Joffrey'],
+    other:       ['Stannis','Balon']
   },
   {
-    name:  'Balon',
-    house: 'Greyjoy',
-    lands: [24],
-    warCry: ' sails to war with his reavers!',
-    allies: [],
-    enemies: ['Robb']
+    name:        'Balon',
+    house:       'Greyjoy',
+    influence:   8, // the Ironborn are sure to rise again, and have nothing to lose!
+    landIndices: [24],
+    warCry:      ' sails to war with his reavers!',
+    allies:      [],
+    enemies:     ['Robb'],
+    other:       ['Joffrey', 'Stannis', 'Renly']
   },
   {
-    name:  'Robb',
-    house: 'Stark',
-    lands: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-    warCry: ', the Young Wolf, demands vengeance!',
-    allies: ['Renly'],
-    enemies: ['Joffrey']
+    name:        'Robb',
+    house:       'Stark',
+    influence:   6, // the young wolf is untested, but his virtue is true
+    landIndices: [3, 4, 5, 6, 7, 8, 9, 10, 11,
+                  12, 13, 14, 15, 16, 17, 18, 19],
+    warCry:      ', the Young Wolf, demands vengeance!',
+    allies:      ['Renly'],
+    enemies:     ['Joffrey'],
+    other:       ['Stannis', 'Balon']
   }
 ]
 
 var neutral = [0, 1, 2, 20, 21, 22, 23, 46, 47, 48, 49, 50, 51, 52, 53];
-
-var adjacentRegions = {
-  'The Wall'        : [
-    'The Wall',
-    'The North',
-    'The Vale',
-    'The Iron Islands',
-    'The Stormlands'
-  ],
-  'The North'       : [
-    'The Wall',
-    'The North',
-    'The Riverlands',
-    'The Vale',
-    'The Iron Islands',
-    'The Stormlands'
-  ],
-  'The Riverlands'  : [
-    'The North',
-    'The Riverlands',
-    'The Vale',
-    'The Iron Islands',
-    'The Westerlands',
-    'The Crownlands',
-    'The Reach'
-  ],
-  'The Vale'        : [
-    'The Wall',
-    'The North',
-    'The Riverlands',
-    'The Vale',
-    'The Stormlands'
-  ],
-  'The Iron Islands': [
-    'The Wall',
-    'The North',
-    'The Riverlands',
-    'The Iron Islands',
-    'The Westerlands',
-    'The Reach'
-  ],
-  'The Westerlands' : [
-    'The Riverlands',
-    'The Iron Islands',
-    'The Westerlands',
-    'The Reach'
-  ],
-  'The Crownlands'  : [
-    'The Riverlands',
-    'The Crownlands',
-    'The Stormlands',
-    'The Reach'
-  ],
-  'The Stormlands'  : [
-    'The Wall',
-    'The North',
-    'The Vale',
-    'The Crownlands',
-    'The Stormlands',
-    'The Reach',
-    'Dorne'
-  ],
-  'The Reach'       : [
-    'The Wall',
-    'The North',
-    'The Riverlands',
-    'The Vale',
-    'The Iron Islands',
-    'The Westerlands',
-    'The Crownlands',
-    'The Stormlands',
-    'The Reach',
-    'Dorne'
-  ],
-  'Dorne'           : [
-    'The Iron Islands',
-    'The Stormlands',
-    'The Reach',
-    'Dorne'
-  ]
-};
 
 // Ignore!
 exportToModule('data', [lands, kings, neutral, adjacentRegions]);
@@ -304,7 +521,7 @@ function landsInRegion(region) {
 //    => {
 //    =>   name:  'Stannis',
 //    =>   house: 'Baratheon',
-//    =>   lands: [32, 33, 34]
+//    =>   landIndices: [32, 33, 34]
 //    => }
 //    $ allegianceOf('The Wall');
 //    => {
@@ -329,8 +546,8 @@ function allegianceOf(landName) {
 // **BONUS**: use Array.prototype.filter & .some (a tricky combo!)
 function allegianceOf(landName) {
   var foundKing = kings.filter(function(king) {
-    return king.lands.some(function(landNumber) {
-      return (landName === lands[landNumber].name);
+    return king.landIndices.some(function(landIndex) {
+      return (landName === lands[landIndex].name);
     });
   });
   return foundKing.length > 0 ? foundKing[0] : {name: 'Neutral'};
@@ -343,7 +560,7 @@ function allegianceOf(landName) {
 //    => {
 //    =>   name: 'Balon',
 //    =>   house: 'Greyjoy',
-//    =>   lands: [
+//    =>   landIndices: [
 //    =>     24
 //    =>   ]
 //    => }
@@ -395,8 +612,8 @@ function powerOf(kingName) {
   var king = getKing(kingName);
   if (king === null) return null;
 
-  return king.lands.reduce(function(aggregate, currentLandNumber) {
-    return aggregate += lands[currentLandNumber].power;
+  return king.landIndices.reduce(function(aggregate, currentLandIndex) {
+    return aggregate += lands[currentLandIndex].power;
   }, 0);
 }
 
@@ -434,6 +651,55 @@ function formatPowerOf(king) {
   return ' (P: ' + king.power + ')';
 }
 
+function englishList(list) {
+  var len = list.length;
+
+  if (len == 0) {
+    return '';
+  } else if (len == 1) {
+    return list[0];
+  } else if (len == 2) {
+    return list[0] + ' and ' + list[1];
+  } else {
+    var last_idx = len - 1;
+    var message = list[0];
+    for(var i = 1; i < last_idx; i++) {
+      message += ', ' + list[i];
+    }
+    // oxford comma
+    return message + ', and ' + list[last_idx];
+  }
+}
+
+function diplomaticSituationOf(king) {
+  var allies     = king.allies,
+      enemies    = king.enemies,
+      alliesLen  = allies.length,
+      enemiesLen = enemies.length;
+
+  var neither = kings.map(function(mapKing) {return mapKing.name;})
+                     .filter(function(filterKing) {
+                       return (enemies.indexOf(filterKing) == -1 &&
+                                allies.indexOf(filterKing)  == -1 &&
+                                filterKing != king.name);
+                      });
+
+  var neitherLen = neither.length,
+      messages   = [],
+      alliesMessage, enemiesMessage, neitherMessage;
+
+  enemiesMessage = 'sees ' + englishList(enemies) +
+                (enemiesLen > 1 ? ' as enemies' : ' as an enemy');
+  alliesMessage  = 'is allied to ' + englishList(allies);
+  neitherMessage = 'has an uneasy peace with ' + englishList(neither);
+
+  if (enemiesLen > 0) messages.push(enemiesMessage);
+  if (alliesLen  > 0) messages.push(alliesMessage);
+  if (neitherLen > 0) messages.push(neitherMessage);
+
+  return king.name + ' ' + englishList(messages) + '.';
+}
+
 /********************************
  * CHAPTER 6: A Storm of Swords *
  ********************************/
@@ -452,6 +718,225 @@ const DIP_STATS = [BREAK_ALLY, MAKE_ENEMY, FIGHT, ACCEPT_PEACE, MAKE_PEACE, ACCE
 
 /* ************* DEFINE THE BELOW ON THE KING OBJECTS ************** */
 kings.forEach(function(king) {
+  king.lands = function() {
+    return this.landIndices.map(function(landIndex) {
+      return lands[landIndex];
+    });
+  }
+
+  king.regions = function() {
+    return this.lands().reduce(function(aggregator, value) {
+      if (aggregator.indexOf(value.region) === -1) aggregator.push(value.region);
+      return aggregator;
+    }, []);
+  }
+
+  king.accessibleRegions = function() {
+    var kingsRegions = this.regions();
+    var accessibleRegions = kingsRegions.slice(); // say what?!?! : cloning
+    kingsRegions.forEach(function(region) {
+      // console.log(region)
+      adjacentRegions[region].forEach(function(adjacentRegion) {
+        if (accessibleRegions.indexOf(adjacentRegion) === -1) {
+          accessibleRegions.push(adjacentRegion);
+        }
+      });
+    });
+    return accessibleRegions;
+  }
+
+  king.accessibleLands = function() {
+    return this.accessibleRegions()
+                .reduce(function(aggregator, region) {
+                  landsInRegion(region).forEach(function(land) {
+                    aggregator.push(land);
+                  });
+                  return aggregator;
+                }, [])
+                .filter(function(land) {
+                  // console.log(allegianceOf(land.name).name, this.name, allegianceOf(land.name).name == this.name)
+                  return allegianceOf(land.name) !== this;
+                }.bind(this));
+  }
+
+  king.accessibleLandsWithAllegiance = function() {
+    return this.accessibleLands()
+  }
+
+  // king.move = function() {}
+    // can be: request ally, request peace, raid, or attack
+    //
+    // if dipStat is make ally, then request ally
+    // else if allied with everyone, then bide time
+    //
+    // if dipStat is make peace, then attempt to make peace with an enemy
+    // else if no enemies can be attacked, then bide time
+    //
+    // if dipStat is make enemy, then attack someone who is not an ally or enemy
+    // else if no one is not an ally or enemy, then attack enemy
+    // else if no enemy can be attacked (ie everyone is ally), then attack ally
+    //
+    // if dipStat is accept peace but fight, or fight
+    //   if no non-ally, then
+    //     if accept peace, then bide time
+    //     if fight, then raid random ally
+    //   if no enemy can be attacked, then raid random non ally
+    //   else attack enemy
+    //
+    // if dipState is make enemy
+    //   if have non-ally non-enemy, then attack random non-ally non-enemy
+    //   if have no non-ally non-enemy, and there are allies, raid allied territory
+    //   if have only enemies and no neutral territory, attack random enemy
+    //   if have only enemies and neutral territory, then raid neutral territory
+    //
+    // if dipStat is break ally
+    //   if ally, attack ally (back stabber!)
+    //   if non-enemy, then attack random non-enemy
+    //   if have only enemies and neutral territory, then attack neutral territory
+    //   else (only enemies, no neutrals), then ...
+    //     call upon the Targaryens! gain +20 pp, change to:
+    //     Daenarys Stormborn, House Targaryen, and get 3 straight attacks from
+    //     here on out (the dragon has three heads!)
+    //
+  king.move = function() {
+    var moveDescription;
+    if (this.diplomaticStatus.level === 6) { // MAKE AN ALLY!
+      if (this.allies.length === (kings.length - 1)) {
+        // you are allies with everyone!
+        moveDescription = '  ' + this.name + ' is in a good position and bides his time.';
+        return moveDescription;
+      }
+      var partner = this.requestAlly();
+      if (partner) {
+        this.makeAlly(partner);
+        // console.log(this);
+        // console.log(partner);
+        moveDescription = '  ' + this.name + ' offers an alliance to ' + partner.name + '... And ' + partner.name + ' accepts!';
+        moveDescription += '\n  Now ' + diplomaticSituationOf(this);
+        moveDescription += '\n  Now ' + diplomaticSituationOf(partner);
+      } else {
+        moveDescription = '  ' + this.name + ' ponders an alliance, but finds no partners.';
+      }
+      return moveDescription;
+    } else if (this.diplomaticStatus.level === 5 || this.diplomaticStatus.level === 4) { // MAKE PEACE!
+      if (this.enemies.length === 0) {
+        // you have no enemies!
+        moveDescription = '  ' + this.name + ' is in a good position and bides his time.';
+        return moveDescription;
+      } else {
+        var partner = this.requestPeace();
+        // console.log('makin peace!', this, partner);
+        if (partner) {
+          this.makePeace(partner);
+          moveDescription = '  ' + this.name + ' offers peace to ' + partner.name + '... And ' + partner.name + ' accepts!';
+          moveDescription += '\n  Now ' + diplomaticSituationOf(this);
+          moveDescription += '\n  Now ' + diplomaticSituationOf(partner);
+        } else {
+          moveDescription = '  ' + this.name + ' ponders peace, but finds no partners.';
+        }
+        return moveDescription;
+      }
+    } else if (this.diplomaticStatus.level === 3 || this.diplomaticStatus.level === 2) { // FIGHT!
+      moveDescription = '  Let\'s get physical!';
+      // console.log("can attack: ", )
+      console.log(this.accessibleLandsWithAllegiance());
+      //   if no enemy can be attacked, then raid random non ally
+      //   else attack enemy
+      if (this.allies.length === (kings.length - 1)) {
+        // you have only allies!
+        if (this.diplomaticStatus.level === 3) { // if accept peace, then bide time
+          moveDescription = '  ' + this.name + ' is in a good position and bides his time.';
+        } else {
+          var targetKing = random(this.allies);
+          // var targetLand = random(targetKing.lands.filter(function(land) {return }));
+          if (targetLand) {
+            moveDescription = '  ' + this.name + ' has grown weary of peace, and decides to raid ' + targetLand.name + '!';
+            this.raid(targetLand);
+          } else {
+            moveDescription = '  ' + this.name + ' has grown weary of peace, but finds no suitable target for his wrath...';
+          }
+        }
+      }
+
+      return moveDescription;
+    }
+  }
+
+  king.requestAlly = function() {
+    var ally = false;
+    var otherKings = kings;
+    otherKings.splice(kings.indexOf(this), 1);
+    // TODO: explain that we need to use FOR loop or pass context, bind
+    otherKings.forEach(function(otherKing) {
+      if (this.allies.indexOf(otherKing.name) === -1) {
+        // can't make allies unless you aren't allies
+        // console.log(otherKing.name, otherKing.diplomaticStatus.level, '4/5');
+        if (this.enemies.indexOf(otherKing.name) === -1 &&
+            otherKing.diplomaticStatus.level >= MAKE_PEACE.level) {
+          // there is another king that is not an enemy AND is willing to make
+          //   peace, ie a low threshold
+          ally = otherKing;
+        } else if (otherKing.diplomaticStatus.level >= ACCEPT_ALLY.level) {
+          // there is another king that is an enemy but still wants an ally!
+          ally = otherKing;
+        }
+      }
+    }.bind(this)); // if there are multiple, will take the last... oh well...
+    return ally;
+  }
+
+  king.makeAlly = function(otherKing) {
+    // remove from enemies if necessary
+    this.makePeace(otherKing);
+
+    // add to allies
+    this.allies.push(otherKing.name)
+    otherKing.allies.push(this.name)
+  }
+
+  // enemies can be one way... allies must be two-way
+  king.makeEnemy = function(otherKing) {
+    // remove from allies if necessary
+    var thisIndex  = this.allies.indexOf(otherKing.name);
+    var otherIndex = otherKing.allies.indexOf(this.name);
+    if (thisIndex === -1) {
+      this.allies.splice(thisIndex, 1);
+    }
+    if (otherIndex === -1) {
+      otherKing.allies.splice(otherIndex, 1);
+    }
+
+    // add to enemies
+    this.enemies.push(otherKing.name);
+  }
+
+  // TODO: add a reminder to put in returns in our blocks (forEach, map, reduce, filter)
+  king.requestPeace = function() {
+    var partner = false;
+    var enemies = this.enemies.map(function(enemy) {return getKing(enemy)});
+
+    // TODO: explain that we need to use FOR loop or pass context, bind
+    enemies.forEach(function(otherKing) {
+      // console.log(otherKing.name, otherKing.diplomaticStatus.level, '4/5');
+      if (otherKing.diplomaticStatus.level >= MAKE_PEACE.level) {
+        // there is an enemy that is is willing to make peace
+        partner = otherKing;
+      }
+    }.bind(this)); // if there are multiple, will take the last... oh well...
+    return partner;
+  }
+
+  king.makePeace = function(otherKing) {
+    // remove from enemies!
+    var thisIndex  = this.enemies.indexOf(otherKing.name);
+    var otherIndex = otherKing.enemies.indexOf(this.name);
+    if (thisIndex !== -1)  this.enemies.splice(thisIndex, 1);
+    if (otherIndex !== -1) otherKing.enemies.splice(otherIndex, 1);
+  }
+
+  king.raid = function(territory) {}
+  king.attack = function(territory) {}
+
   // king.diplomaticStatus = function() {}
     // depends upon type being reasonable or unreasonable, resourceful or rigid (chaotic or lawful)
     //
@@ -497,151 +982,9 @@ kings.forEach(function(king) {
     this.diplomaticStatus = DIP_STATS[returnIndex];
     return this.diplomaticStatus;
   }
-
-  // king.move = function() {}
-    // can be: request ally, request peace, raid, or attack
-    //
-    // if dipStat is make ally, then request ally
-    // else if allied with everyone, then bide time
-    //
-    // if dipStat is make peace, then attempt to make peace with an enemy
-    // else if no enemies can be attacked, then bide time
-    //
-    // if dipStat is break ally, then raid allied territory
-    // else if no allies, then attack neutral
-    // else if no neutral, then raid random
-    //
-    // if dipStat is make enemy, then attack someone who is not an ally or enemy
-    // else if no one is not an ally or enemy, then attack enemy
-    // else if no enemy can be attacked (ie everyone is ally), then attack ally
-    //
-    // else (dipStat is accept ally, accept peace, or fight)
-    //   if have an enemy, attack enemy
-    //   if no enemy can be attacked, then raid random non ally
-    //   if no non-ally, then bide time
-  king.move = function() {
-    var moveDescription;
-    if (this.diplomaticStatus.level === 6) { // MAKE AN ALLY!
-      if (this.allies.length === (kings.length - 1)) {
-        // you are allies with everyone!
-        moveDescription = '  ' + this.name + ' is in a good position and bides his time.';
-        return moveDescription;
-      }
-      var partner = this.requestAlly();
-      if (partner) {
-        this.makeAlly(partner);
-        // console.log(this);
-        // console.log(partner);
-        moveDescription = '  ' + this.name + ' offers an alliance to ' + partner.name + '... And ' + partner.name + ' accepts!';
-      } else {
-        moveDescription = '  ' + this.name + ' ponders an alliance, but finds no partners.';
-      }
-      return moveDescription;
-    } else if (this.diplomaticStatus.level === 5 || this.diplomaticStatus.level === 4) { // MAKE PEACE!
-      if (this.enemies.length === 0) {
-        // you have no enemies!
-        moveDescription = '  ' + this.name + ' is in a good position and bides his time.';
-        return moveDescription;
-      } else {
-        var partner = this.requestPeace();
-        console.log('makin peace!', this, partner);
-        if (partner) {
-          this.makePeace(partner);
-          moveDescription = '  ' + this.name + ' offers peace to ' + partner.name + '... And ' + partner.name + ' accepts!';
-        } else {
-          moveDescription = '  ' + this.name + ' ponders peace, but finds no partners.';
-        }
-        return moveDescription;
-      }
-    }
-  }
-
-  king.requestAlly = function() {
-    var ally = false;
-    var otherKings = kings;
-    otherKings.splice(kings.indexOf(this), 1);
-    // TODO: explain that we need to use FOR loop or pass context, bind
-    otherKings.forEach(function(otherKing) {
-      if (this.allies.indexOf(otherKing.name) === -1) {
-        // can't make allies unless you aren't allies
-        // console.log(otherKing.name, otherKing.diplomaticStatus.level, '4/5');
-        if (this.enemies.indexOf(otherKing.name) === -1 &&
-            otherKing.diplomaticStatus.level >= MAKE_PEACE.level) {
-          // there is another king that is not an enemy AND is willing to make
-          //   peace, ie a low threshold
-          ally = otherKing;
-        } else if (otherKing.diplomaticStatus.level >= ACCEPT_ALLY.level) {
-          // there is another king that is an enemy but still wants an ally!
-          ally = otherKing;
-        }
-      }
-    }.bind(this)); // if there are multiple, will take the last... oh well...
-    return ally;
-  }
-
-  king.makeAlly = function(otherKing) {
-    // remove from enemies if necessary
-    var thisIndex  = this.enemies.indexOf(otherKing.name);
-    var otherIndex = otherKing.enemies.indexOf(this.name);
-    if (thisIndex === -1) {
-      this.enemies.splice(thisIndex, 1);
-    }
-    if (otherIndex === -1) {
-      otherKing.enemies.splice(otherIndex, 1);
-    }
-
-    // add to allies
-    this.allies.push(otherKing.name)
-    otherKing.allies.push(this.name)
-  }
-
-  // enemies can be one way... allies must be two-way
-  king.makeEnemy = function(otherKing) {
-    // remove from allies if necessary
-    var thisIndex  = this.allies.indexOf(otherKing.name);
-    var otherIndex = otherKing.allies.indexOf(this.name);
-    if (thisIndex === -1) {
-      this.allies.splice(thisIndex, 1);
-    }
-    if (otherIndex === -1) {
-      otherKing.allies.splice(otherIndex, 1);
-    }
-
-    // add to enemies
-    this.enemies.push(otherKing.name);
-  }
-
-  // TODO: add a reminder to put in returns in our blocks (forEach, map, reduce, filter)
-  king.requestPeace = function() {
-    var partner = false;
-    var enemies = this.enemies.map(function(enemy) {return getKing(enemy)});
-
-    // TODO: explain that we need to use FOR loop or pass context, bind
-    enemies.forEach(function(otherKing) {
-      // console.log(otherKing.name, otherKing.diplomaticStatus.level, '4/5');
-      if (otherKing.diplomaticStatus.level >= MAKE_PEACE.level) {
-        // there is an enemy that is is willing to make peace
-        partner = otherKing;
-      }
-    }.bind(this)); // if there are multiple, will take the last... oh well...
-    return partner;
-  }
-
-  king.makePeace = function(otherKing) {
-    // remove from enemies if necessary
-    var thisIndex  = this.enemies.indexOf(otherKing.name);
-    var otherIndex = otherKing.enemies.indexOf(this.name);
-    if (thisIndex === -1) {
-      this.enemies.splice(thisIndex, 1);
-    }
-    if (otherIndex === -1) {
-      otherKing.enemies.splice(otherIndex, 1);
-    }
-  }
-
-  king.raid = function(territory) {}
-  king.attack = function(territory) {}
 });
+
+/* ***************** FIGHT PRINTOUTS ****************** */
 
 // actually fight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -683,6 +1026,13 @@ for (var i = 0; i < 1; i++) {
     console.log('  ' + title + contender['name'] + ' of House ' + contender['house'] + formatPowerOf(contender) + message);
   }
 
+  console.log('\nThe diplomatic situation is:');
+
+  for (var j = 0, len = currentKings.length; j < len; j++) {
+    var king = currentKings[j];
+    console.log('  ' + diplomaticSituationOf(king));
+  }
+
   console.log('\nThe balance of power is:');
 
   for (var j = 0, len = regions.length, region, lands; j < len; j++) {
@@ -695,11 +1045,10 @@ for (var i = 0; i < 1; i++) {
       return allegianceOf(land.name).name;
     });
     var powers = regionsLands.reduce( function(aggregator, value) {
-      if (aggregator.indexOf(value) == -1) {
-        aggregator.push(value);
-      }
+      if (aggregator.indexOf(value) == -1) aggregator.push(value);
       return aggregator;
     }, []);
+
     if (powers.length == 1) {
       if (powers[0] == 'Neutral') {
         console.log('  ' + region + ' remain' + (plural ? '' : 's') + ' neutral.');
@@ -709,9 +1058,9 @@ for (var i = 0; i < 1; i++) {
     } else {
       if (powers.indexOf('Neutral') !== -1) {
         powers.splice(powers.indexOf('Neutral'), 1);
-        console.log('  ' + region + (plural ? ' are ' : ' is ') + 'contested by ' + powers.join(', ') + '; but desires neutrality.');
+        console.log('  ' + region + (plural ? ' are ' : ' is ') + 'contested by ' + englishList(powers) + '; but desires neutrality.');
       } else {
-        console.log('  ' + region + (plural ? ' are ' : ' is ') + 'contested by ' + powers.join(', ') + '.');
+        console.log('  ' + region + (plural ? ' are ' : ' is ') + 'contested by ' + englishList(powers) + '.');
       }
     }
   }
@@ -733,3 +1082,9 @@ for (var i = 0; i < 1; i++) {
  ********************************/
 
 // callbacks and object-namespaces
+debugger
+
+regionsLands = landsInRegion(region);
+regionsLands = regionsLands.map(function(land) {
+  return allegianceOf(land.name).name;
+});
