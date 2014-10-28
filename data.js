@@ -444,10 +444,10 @@ for(var i = 0, len = data.lands.length, land; i < len; i++) {
 
 for(var i = 0, len = data.lands.length, land, message, itother; i < len; i++) {
   land = data.lands[i];
-  isSea = land.sea
+  isSea        = land.sea
   isStronghold = land.type === 'stronghold'
 
-  message = '';
+  message = '' //land.region + ' ';
 
   if (isSea && isStronghold) {
     message += clc.magenta(pad(land.name + ':', 21));
@@ -455,14 +455,18 @@ for(var i = 0, len = data.lands.length, land, message, itother; i < len; i++) {
     message += clc.blue(pad(land.name + ':', 21));
   } else if (isStronghold) {
     message += clc.yellow(pad(land.name + ':', 21));
+  } else if (land.type === 'city') {
+    message += clc.green(pad(land.name + ':', 21));
   } else {
     message += pad(land.name + ':', 21);
   }
   message = message;
 
-  message += 'P' + pad(2, land.power, '0') + 'D' + pad(2, land.defense, '0');
-  itother = '    it -->' + land.adjacent.length + ' <> ' + adjacent[i] + ' <-- other';
-  message += land.adjacent.length == adjacent[i] ? itother : clc.red(itother);
+  // message += 'P' + pad(2, land.power, '0') + 'D' + pad(2, land.defense, '0');
+  // itother = '    it -->' + land.adjacent.length + ' <> ' + adjacent[i] + ' <-- other';
+  // message += land.adjacent.length == adjacent[i] ? itother : clc.red(itother);
+
+  message += land.adjacent.map(function(adj) {return data.lands[adj].name});
   console.log(message);
 }
 
