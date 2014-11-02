@@ -9,7 +9,7 @@
 
 // For really modeling this war, we're going to need some better **data**:
 //   - regions: a list of the regions of Westeros -- the Seven Kingdoms et al
-//   - lands:   a list of the major territories of each of these regions
+//   - domains: a list of the major domains of each of these regions
 //   - kings:   a list of the claimants to kingship, and the lands that recognize
 //       allegiance to each,
 //   - neutral: the list of lands not claiming any king.
@@ -30,7 +30,7 @@ data.regions = [
   'Dorne'             // 7 (kingdoms)
 ];
 
-data.lands = [
+data.domains = [
   /* ******************************** THE  WALL ***************************** */
   { /* 00 */
     name: 'The Wall',        type: 'stronghold', region: 'The Wall',
@@ -272,12 +272,12 @@ data.lands = [
   },
   { /* 46 */
     name: 'Goldengrove',        type: 'territory',  region: 'The Reach',
-    power: 4, defense: 1,
+    power: 3, defense: 1,
     adjacent: [20, 21, 30, 31, 44, 47, 51]
   },
   { /* 47 */
     name: 'The Mander',         type: 'territory',  region: 'The Reach',
-    power: 5, defense: 1,
+    power: 3, defense: 1,
     adjacent: [20, 35, 37, 38, 46, 48, 51]
   },
   { /* 48 */
@@ -307,8 +307,8 @@ data.lands = [
   },
   { /* 53 */
     name: 'Oldtown',            type: 'city',       region: 'The Reach',
-    power: 9, defense: 2,
-    adjacent: [45, 50]
+    power: 8, defense: 2, // if neutral, make 9/9
+    adjacent: [45, 50] // make neutral??????
   },
   /* ********************************** DORNE ******************************* */
   { /* 54 */
@@ -448,55 +448,56 @@ data.neutral = [0, 1, 2, 22, 23, 24, 25, 26, 46, 47, 48, 49,
 
 // ...
 
-// english list
-// printJSONObject(obj, propList)
+// 1.  english list
+// 2.  stringify JSON Object (obj, propList)
+// 3.  enumerate Object --> forEachPropIn(obj, callback)
 
-// printRegion
-// printDomain
-// printKing
+// 4.  regionString xxxxxxxxxxxxx
+// 5.  domainString
+// 6.  kingString
 
-// list the domains
-// list the regions (each)
-// find the domains in a region (map)
-// find a region's power (reduce)
+// 7.  list the domains (each)
+// 8.  list the regions xxxxxxxxxx
+// 9.  find the domains in a region (map)
+// 10. find a region's power (reduce)
 
-// sort the regions by power (sort)
-// sort the regions by number of domains
-// sort the regions by average defense (2 functions -- avg & sortByAvg)
-// sort the regions by median defense...
+// 11. sort the regions by power (sort)
+// 12. sort the regions by number of domains
+// 13. sort the regions by average defense (2 functions -- avg & sortByAvg)
+// 14. sort the regions by median defense...
 
-// list the kings
-// find the allegiance of any given domain
-// list a king's dominion (all their domains)
-// find a king's power
-// list the neutrals
-// list the neutral's power by region
-// sort the neutrals by their average power
+// 15. list the kings
+// 16. find the allegiance of any given domain
+// 17. list a king's dominion (all their domains)
+// 18. find a king's power
+// 19. list the neutrals
+// 20. list the neutral's power by region
+// 21. sort the neutrals by their average power
 
-// sort the neutral regions by their power-to-defense ratio
+// 22. sort the neutral regions by their power-to-defense ratio
 
-// get adjacent domains by any domain's index
-// use select/filter to grab the seas adjacent to any domain
+// 23. get adjacent domains by any domain's index
+// 24. use select/filter to grab the seas adjacent to any domain
 
-// create a list of sea indices and add it to the data object
-// select/filter out just seas from domain lists
+// 25. create a list of sea indices and add it to the data object
+// 26. select/filter out just seas from domain lists
 
-// list the adjacent seas to any domain index
-// list the reachable domains to any domain index:
+// 27. list the adjacent seas to any domain index
+// 28. list the reachable domains to any domain index:
   // from any land: adjacent lands and seas, and
   //                seas adjacent to any adjacent sea
   // from any sea: adjacent lands and seas, and
   //               seas adjacent to any adjacent sea, and
   //               lands adjacent to any adjacent sea
 
-// create a table of reachable lands from any index, and add it to the data object
+// 29. create a table of reachable lands from any index, and add it to the data object
   // - a hashmap-style object, where the properties are the domain indices
   // - each domain-index value is a hashmap-style object where the properties are
     // - the domain-indices of the reachable lands, and they map to array values
     // - that include 'direct' (if they are directly adjacent), and
     // - a list of domain-indices they can be reached thru (seas)
 
-// finally, write a function that maps any domain to a list of reachable domains
+// 30. finally, write a function that maps any domain to a list of reachable domains
 // that include:
   // an allegiance index
   // a path index that is the relationship in the reachable table btwn the lands
@@ -506,54 +507,11 @@ data.neutral = [0, 1, 2, 22, 23, 24, 25, 26, 46, 47, 48, 49,
 var clc = require('cli-color');
 var pad = require('pad');
 
-var adjacent = {};
-for(var i = 0, len = data.lands.length, land; i < len; i++) {
-  land = data.lands[i];
-  for(var j = 0, adj; j < land.adjacent.length; j++) {
-    adj = land.adjacent[j];
-    if (!(adj in adjacent)) {
-      adjacent[adj] = 1;
-    } else {
-      adjacent[adj]++;
-    }
-  }
-}
+var utilities = {};
 
-function allegianceOf(landName) {
-  var foundKing = data.kings.filter(function(king) {
-    return king.landIndices.some(function(landIndex) {
-      return (landName === data.lands[landIndex].name);
-    });
-  });
-  if (foundKing.length === 0) {
-    foundKing = data.neutral.filter(function(land) {
-      return landName === data.lands[land].name;
-    });
-    return foundKing.length === 1 ? {name: 'Neutral'} : null;
-  } else {
-    return foundKing[0];
-  }
-}
+// 1.  english list
 
-function powerOfKing(kingObj) {
-  // var king = getKing(kingName);
-  // if (king === null) return null;
-
-  return kingObj.landIndices.reduce(function(aggregate, currentLandIndex) {
-    return aggregate += data.lands[currentLandIndex].power;
-  }, 0);
-}
-
-function powerOfRegion(regionName) {
-  // var king = getKing(kingName);
-  // if (king === null) return null;
-
-  return king.landIndices.reduce(function(aggregate, currentLandIndex) {
-    return aggregate += data.lands[currentLandIndex].power;
-  }, 0);
-}
-
-function englishList(list) {
+utilities.englishList = function(list) {
   var len = list.length;
 
   if (len == 0) {
@@ -573,213 +531,449 @@ function englishList(list) {
   }
 }
 
-function adjacentTo(land) {
-  var adjacentLandIndices = land.adjacent;
+// 2.  stringify object properties (obj, propList)
 
-  return adjacentLandIndices.map(function(idx) {
-    var land = data.lands[idx];
-    land.index = idx;
-    return land;
-  });
-}
-
-function filterSeasFromLands(landList) {
-  return landList.filter(function(adjLand) {
-    return (adjLand.sea == true);
-  });
-}
-
-// function adjacentSeas(land) {
-//   var adjacentLands = adjacentTo(land);
-//
-//
-// }
-
-//DUP ARRAY!
-// function dup(arr) {
-//   return arr.slice(0);
-// }
-//
-// function uniqueArray(arr) {
-//   arr = dup(arr).sort(function(a, b) {return a - b;});
-//   for(var i = 0; i < arr.length; i++) {
-//     if (arr[i] == arr[i+1]) {
-//       arr.splice(i+1,1);
-//     }
-//   }
-//   return arr;
-// }
-//
-// function uniqueMergeArrays() {
-//   var mergedArray = [];
-//   for (var i = 0; i < arguments.length; i++) {
-//     mergedArray = mergedArray.concat(arguments[i]);
-//   }
-//   return uniqueArray(mergedArray);
-// }
-
-function allReachable(land) {
-
-  // get list of adjacenct lands
-  adjacentLands = adjacentTo(land);
-
-  // pick out the adjancenct lands that are seas
-  adjacentSeas =  filterSeasFromLands(adjacentLands);
-
-  // for each sea, get the list of adjacent lands
-  adjacentLandsToSeas = {};
-  adjacentSeas.forEach(function(sea) {
-    adjacentLandsToSeas[sea.index] = adjacentTo(sea).map(function(l) {
-      return l.index;
-    });
-  });
-
-  // create a list of all, unique, adjacent lands -- OR NOT???
-  adjacentIndexList = {};
-
-  land.adjacent.forEach(function(adj) {
-    // console.log(adj)
-    adjacentIndexList[adj] = ['direct'];
-  });
-
-  for(var sea in adjacentLandsToSeas) {
-    // console.log(sea);
-    adjacentIndexList[sea].push('sea');
-    // console.log(adjacentLandsToSeas[sea])
-    adjacentLandsToSeas[sea].forEach(function(adj) {
-      var idx = Object.keys(adjacentIndexList).indexOf(adj.toString());
-
-      if (idx === -1) {
-        // console.log('add with via sea');
-        adjacentIndexList[adj] = [sea];
-      } else {
-        // console.log('push via sea');
-        adjacentIndexList[adj].push(sea);
-      }
-    });
-
-  }
-  return adjacentIndexList;
-
-  // for each adjacent land, add a reference as direct or via (if it can be
-  //   reached in multiple ways)
-
-}
-
-// for(var i = 0, len = data.lands.length, land, message, itother; i < len; i++) {
-//   land = data.lands[i];
-//
-//   message = landToString(land, i, ':', 25);
-//   message += adjacentToString(land);
-//   // message += allegianceToString(land.name);
-//
-//   console.log(message);
-// }
-
-
-
-// for(var i = 0, len = data.kings.length, king, name, influence, power, message; i < len; i++) {
-//   king      = data.kings[i];
-//   name      = king.name;
-//   influence = king.influence;
-//   power     = powerOfKing(king);
-//
-//   message =  pad(name + ':', 8);
-//   message += ' influence ('          + pad(2, influence, '0') + ')';
-//   message += ', power ('             + pad(2, power, '0') + ')';
-//   message += ', total power ('       + pad(2, influence + power, '0') + ')';
-//   message += ', total power at sea(' + pad(2, influence + power + king.seaPower, '0') + ')';
-//
-//   console.log(message);
-// }
-
-function adjacentToString(land) {
-  var adjacentLandIndices = land.adjacent,
-      adjacentLands,
-      adjacentNames,
-      message;
-
-  adjacentLands = adjacentSeas(land);
-
-  adjacentNames = adjacentLands.map(function(adjLand) {
-    var name = adjLand.name.replace('The ',''),
-        adjacentToThisSea;
-    if (adjLand.sea) {
-      message = clc.blue(name) + ': ';
-      // message = clc.underline(' ' + message + ': ');
-
-      adjacentToThisSea = adjacentSeas(adjLand).map(function(l){
-        return l.name;
-      });
-
-      message += '(' + adjacentToThisSea + ')';
-
-    } else {
-      message = ' ' + clc.yellow(name) + ' ';
-      // message = clc.yellow(' ' + message + ' ')
+utilities.stringifyProps = function(obj, propList) {
+  var len     = propList.length,
+      prop    = '',
+      str     = '';
+  if (len > 0) {
+    prop = propList[0];
+    str  = prop + ': ' + obj[prop];
+    for(var i = 1; i < len; i++) {
+      prop = propList[i];
+      str += ', ' + prop + ': ' + obj[prop];
     }
+  }
+  return str;
+}
 
-    return message;
+// 3.  enumerate Object --> forEachPropIn(obj, callback)
+// passes key, value, obj to the callback
+
+utilities.enumerateObject = function(obj, callback) {
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
+  // http://jsperf.com/object-keys-vs-hasownproperty/4
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty
+  var keys = Object.keys(obj);
+  for(var i = 0, len = keys.length; i < len; i++) {
+    key   = keys[i];
+    value = obj[key];
+    callback(key, value, obj);
+  }
+}
+
+// Array.prototype.includes = function(item) {
+//   return this.indexOf(item) !== -1;
+// }
+// utilities.stringifyProps = function(obj, propList) {
+//   var len     = propList.length,
+//       prop    = '',
+//       str     = '';
+//   utilities.enumerateObject(obj, function(property, value) {
+//     if (propList.includes(property)) {
+//       str += property + ': ' + value + ', ';
+//     }
+//   });
+//   return str.substring(0, str.length - 2);;
+// }
+
+// xxxxxx 4.  printRegion xxxxxx
+// makes no sense
+
+// 5.  printDomain
+utilities.domainString = function(domain, idx) {
+  var str = '';
+
+  if (idx !== undefined) {
+    str = pad(2, idx.toString(), '0') + ' ';
+  }
+  str += domain.name + ' (' +
+         utilities.stringifyProps(domain, ['power', 'defense']) + ')';
+  if (domain.sea) {
+    str = clc.blue(str);
+  }
+  if (domain.type === 'stronghold') {
+    str = clc.underline(str);
+  } else if (domain.type === 'city') {
+    str = clc.bold(str);
+  }
+  return str;
+}
+
+// function landToString(land, idx, delimiter, padding) {
+//   var isSea        = land.sea,
+//       isStronghold = land.type === 'stronghold',
+//       isCity       = land.type === 'city',
+//       cobbleMessage;
+//
+//   delimiter = delimiter || '';
+//   padding   = padding   || 0;
+//
+//   if (delimiter) {
+//     cobbleMessage = function() {return pad(message + land.name + delimiter, padding);}
+//   } else {
+//     cobbleMessage = function() {return message + land.name;}
+//   }
+//
+//   message = pad(2, idx.toString(), '0') + ' ';
+//
+//   if (isSea && isStronghold) {
+//     message = clc.magenta(cobbleMessage());
+//   } else if (isSea) {
+//     message = clc.blue(cobbleMessage());
+//   } else if (isStronghold) {
+//     message = clc.yellow(cobbleMessage());
+//   } else if (isCity) {
+//     message = clc.green(cobbleMessage());
+//   } else {
+//     message = cobbleMessage();
+//   }
+//   return message
+// }
+
+// 6.  kingString
+utilities.kingString = function(king) {
+  var str = king.name + ' (' +
+            utilities.stringifyProps(king, ['influence']) + ')';
+  return str;
+}
+
+// 7.  log the domains in the console...
+utilities.logDomains = function() {
+  data.domains.forEach(function(domain, idx) {
+    console.log(utilities.domainString(domain, idx));
+  });
+}
+
+// 8.  list the regions (each) xxxxxxxxxx
+
+// 9.  find the domains in a region (select/filter)
+data.domainsInRegion = function(region) {
+  return data.domains.filter(function(domain) {
+    return domain.region === region;
+  });
+}
+
+// 10. find a region's power (reduce)
+utilities.powerOfRegion = function(region) {
+  var domains = utilities.domainsInRegion(region);
+  return domains.reduce(function(aggregator, domain) {
+    return aggregator + domain.power;
+  }, 0);
+}
+
+// ... return a region with a power
+utilities.regionWithPower = function(region) {
+  return {name: region, power: utilities.powerOfRegion(region)}
+}
+
+// 11. sort the regions by power (map, sort)
+data.regionsByPower = function() {
+  var regionsWithPower = data.regions.map(function(region) {
+    return utilities.regionWithPower(region);
+  });
+  return regionsWithPower.sort(function(reg1, reg2) {
+    return reg2.power - reg1.power;
+  });
+}
+
+// 12. sort the regions by number of domains
+data.regionsByDomains = function() {
+  var regionsWithDomains = data.regions.map(function(region) {
+    return {name: region, domains: utilities.domainsInRegion(region).length};
+  });
+  return regionsWithDomains.sort(function(reg1, reg2) {
+    return reg2.domains - reg1.domains;
+  });
+}
+
+// 13. sort the regions by average defense (2 functions -- avg & sortByAvg)
+utilities.averageOf = function(list, property) {
+  for (var i = 0, len = list.length, sum = 0; i < len; i++) {
+    sum += list[i][property];
+  }
+  return Math.round(sum/len);
+}
+
+data.regionsByAvgDefense = function() {
+  var regionsWithDomains = data.regions.map(function(region) {
+    var domainsInRegion = utilities.domainsInRegion(region);
+    var avgDefense = utilities.averageOf(domainsInRegion, 'defense');
+    return {name: region, avgDefense: avgDefense};
+  });
+  return regionsWithDomains.sort(function(reg1, reg2) {
+    return reg2.avgDefense - reg1.avgDefense;
+  });
+}
+
+// 14. sort the regions by median defense...
+utilities.medianOf = function(list, property) {
+  var sortList = list.slice(0), // clone array
+      len      = sortList.length,
+      medianIdx;
+
+  sortList = sortList.sort(function(reg1, reg2) {
+    return reg2[property] - reg1[property];
   });
 
-  return englishList(adjacentNames);
-}
-
-function allegianceToString(land) {
-  var allegiance = allegianceOf(land);
-  return allegiance ?  allegiance.name : clc.red('n/a');
-}
-
-function landToString(land, idx, delimiter, padding) {
-  var isSea        = land.sea,
-      isStronghold = land.type === 'stronghold',
-      isCity       = land.type === 'city',
-      cobbleMessage;
-
-  delimiter = delimiter || '';
-  padding   = padding   || 0;
-
-  if (delimiter) {
-    cobbleMessage = function() {return pad(message + land.name + delimiter, padding);}
+  // http://stackoverflow.com/questions/25305640/find-median-values-from-array-in-javascript-8-values-or-9-values
+  medianIdx = Math.floor((len - 1) / 2); // NB: operator precedence
+  if (len % 2) {
+    return sortList[medianIdx][property]
   } else {
-    cobbleMessage = function() {return message + land.name;}
+    return (sortList[medianIdx][property] + sortList[medianIdx + 1][property])/2.0;
   }
-
-  message = pad(2, idx.toString(), '0') + ' ';
-
-  if (isSea && isStronghold) {
-    message = clc.magenta(cobbleMessage());
-  } else if (isSea) {
-    message = clc.blue(cobbleMessage());
-  } else if (isStronghold) {
-    message = clc.yellow(cobbleMessage());
-  } else if (isCity) {
-    message = clc.green(cobbleMessage());
-  } else {
-    message = cobbleMessage();
-  }
-  return message
 }
+
+data.regionsByMedDefense = function() {
+  var regionsWithDomains = data.regions.map(function(region) {
+    var domainsInRegion = utilities.domainsInRegion(region);
+    var medDefense = utilities.medianOf(domainsInRegion, 'defense');
+    return {name: region, medDefense: medDefense};
+  });
+  return regionsWithDomains.sort(function(reg1, reg2) {
+    return reg2.medDefense - reg1.medDefense;
+  });
+}
+
+// 15. log the kings to the console
+utilities.kingString = function(king) {
+  var str = king.name + ' (' +
+            utilities.stringifyProps(king, ['influence']) +
+            
+             ')';
+  return str;
+}
+
+utilities.logKings = function() {
+  data.kings.forEach(function(king) {
+    console.log(utilities.kingString(king));
+  });
+}
+
+// 16. find the allegiance of any given domain
+// 17. list a king's dominion (all their domains)
+// 18. find a king's power
+// 19. list the neutrals
+// 20. list the neutral's power by region
+// 21. sort the neutrals by their average power
+
+// function allegianceOf(landName) {
+//   var foundKing = data.kings.filter(function(king) {
+//     return king.landIndices.some(function(landIndex) {
+//       return (landName === data.lands[landIndex].name);
+//     });
+//   });
+//   if (foundKing.length === 0) {
+//     foundKing = data.neutral.filter(function(land) {
+//       return landName === data.lands[land].name;
+//     });
+//     return foundKing.length === 1 ? {name: 'Neutral'} : null;
+//   } else {
+//     return foundKing[0];
+//   }
+// }
+//
+// function powerOfKing(kingObj) {
+//   // var king = getKing(kingName);
+//   // if (king === null) return null;
+//
+//   return kingObj.landIndices.reduce(function(aggregate, currentLandIndex) {
+//     return aggregate += data.lands[currentLandIndex].power;
+//   }, 0);
+// }
+//
+// function powerOfRegion(regionName) {
+//   // var king = getKing(kingName);
+//   // if (king === null) return null;
+//
+//   return king.landIndices.reduce(function(aggregate, currentLandIndex) {
+//     return aggregate += data.lands[currentLandIndex].power;
+//   }, 0);
+// }
+//
+
+//
+// function adjacentTo(land) {
+//   var adjacentLandIndices = land.adjacent;
+//
+//   return adjacentLandIndices.map(function(idx) {
+//     var land = data.lands[idx];
+//     land.index = idx;
+//     return land;
+//   });
+// }
+//
+// function filterSeasFromLands(landList) {
+//   return landList.filter(function(adjLand) {
+//     return (adjLand.sea == true);
+//   });
+// }
+//
+// // function adjacentSeas(land) {
+// //   var adjacentLands = adjacentTo(land);
+// //
+// //
+// // }
+//
+// //DUP ARRAY!
+// // function dup(arr) {
+// //   return arr.slice(0);
+// // }
+// //
+// // function uniqueArray(arr) {
+// //   arr = dup(arr).sort(function(a, b) {return a - b;});
+// //   for(var i = 0; i < arr.length; i++) {
+// //     if (arr[i] == arr[i+1]) {
+// //       arr.splice(i+1,1);
+// //     }
+// //   }
+// //   return arr;
+// // }
+// //
+// // function uniqueMergeArrays() {
+// //   var mergedArray = [];
+// //   for (var i = 0; i < arguments.length; i++) {
+// //     mergedArray = mergedArray.concat(arguments[i]);
+// //   }
+// //   return uniqueArray(mergedArray);
+// // }
+//
+// function allReachable(land) {
+//
+//   // get list of adjacenct lands
+//   adjacentLands = adjacentTo(land);
+//
+//   // pick out the adjancenct lands that are seas
+//   adjacentSeas =  filterSeasFromLands(adjacentLands);
+//
+//   // for each sea, get the list of adjacent lands
+//   adjacentLandsToSeas = {};
+//   adjacentSeas.forEach(function(sea) {
+//     adjacentLandsToSeas[sea.index] = adjacentTo(sea).map(function(l) {
+//       return l.index;
+//     });
+//   });
+//
+//   // create a list of all, unique, adjacent lands -- OR NOT???
+//   adjacentIndexList = {};
+//
+//   land.adjacent.forEach(function(adj) {
+//     // console.log(adj)
+//     adjacentIndexList[adj] = ['direct'];
+//   });
+//
+//   for(var sea in adjacentLandsToSeas) {
+//     // console.log(sea);
+//     adjacentIndexList[sea].push('sea');
+//     // console.log(adjacentLandsToSeas[sea])
+//     adjacentLandsToSeas[sea].forEach(function(adj) {
+//       var idx = Object.keys(adjacentIndexList).indexOf(adj.toString());
+//
+//       if (idx === -1) {
+//         // console.log('add with via sea');
+//         adjacentIndexList[adj] = [sea];
+//       } else {
+//         // console.log('push via sea');
+//         adjacentIndexList[adj].push(sea);
+//       }
+//     });
+//
+//   }
+//   return adjacentIndexList;
+//
+//   // for each adjacent land, add a reference as direct or via (if it can be
+//   //   reached in multiple ways)
+//
+// }
+//
+// // for(var i = 0, len = data.lands.length, land, message, itother; i < len; i++) {
+// //   land = data.lands[i];
+// //
+// //   message = landToString(land, i, ':', 25);
+// //   message += adjacentToString(land);
+// //   // message += allegianceToString(land.name);
+// //
+// //   console.log(message);
+// // }
+//
+//
+//
+// // for(var i = 0, len = data.kings.length, king, name, influence, power, message; i < len; i++) {
+// //   king      = data.kings[i];
+// //   name      = king.name;
+// //   influence = king.influence;
+// //   power     = powerOfKing(king);
+// //
+// //   message =  pad(name + ':', 8);
+// //   message += ' influence ('          + pad(2, influence, '0') + ')';
+// //   message += ', power ('             + pad(2, power, '0') + ')';
+// //   message += ', total power ('       + pad(2, influence + power, '0') + ')';
+// //   message += ', total power at sea(' + pad(2, influence + power + king.seaPower, '0') + ')';
+// //
+// //   console.log(message);
+// // }
+//
+// function adjacentToString(land) {
+//   var adjacentLandIndices = land.adjacent,
+//       adjacentLands,
+//       adjacentNames,
+//       message;
+//
+//   adjacentLands = adjacentSeas(land);
+//
+//   adjacentNames = adjacentLands.map(function(adjLand) {
+//     var name = adjLand.name.replace('The ',''),
+//         adjacentToThisSea;
+//     if (adjLand.sea) {
+//       message = clc.blue(name) + ': ';
+//       // message = clc.underline(' ' + message + ': ');
+//
+//       adjacentToThisSea = adjacentSeas(adjLand).map(function(l){
+//         return l.name;
+//       });
+//
+//       message += '(' + adjacentToThisSea + ')';
+//
+//     } else {
+//       message = ' ' + clc.yellow(name) + ' ';
+//       // message = clc.yellow(' ' + message + ' ')
+//     }
+//
+//     return message;
+//   });
+//
+//   return englishList(adjacentNames);
+// }
+//
+// function allegianceToString(land) {
+//   var allegiance = allegianceOf(land);
+//   return allegiance ?  allegiance.name : clc.red('n/a');
+// }
+//
+
 
 // Below you will see this function used... Ignore it or ask us about it! It's
 // how we will test your work to see if it is correct.
-// function fName(f) {
-//   var functionName = f.toString();
-//   functionName     = functionName.substr(9);
-//   return functionName.substr(0, functionName.indexOf('('));
-// }
-//
-// function exportToModule(moduleName, properties) {
-//   if (typeof module !== 'undefined' && module.exports) {
-//     if (module.exports[moduleName] === undefined) {
-//       module.exports[moduleName] = {};
-//     }
-//     properties.forEach(function(property) {
-//       module.exports[moduleName][fName(property)] = property;
-//     });
-//   }
-// }
-// Ignore!
-// exportToModule('data', [lands, kings, neutral, adjacentRegions]);
+function exportToModule(localModules) {
+  if (typeof module !== 'undefined' && module.exports) {
+    for(var moduleName in localModules) {
+      module.exports[moduleName] = localModules[moduleName];
+    }
+    module.exports.load = function(ctx) {
+      for(var moduleName in localModules) {
+        ctx[moduleName] = this[moduleName];
+      }
+    }
+  }
+}
 
-module.exports.data = data;
+exportToModule({
+  data:      data,
+  utilities: utilities
+});
+
+// Use this elsewhere to autoload the exported modules...
+// require('./data').load(this)
